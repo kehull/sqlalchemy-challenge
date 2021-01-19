@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
@@ -27,7 +28,6 @@ def index():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start><br/>"
         f"/api/v1.0/<start>/<end><br/>"
     )
 
@@ -58,30 +58,34 @@ def stations():
 @app.route("/api/v1.0/tobs")
 def tobs():
     # Create our session (link) from Python to the DB
-    session = Session(engine)
-    return f"to write later"
     """Query the dates and temperature observations of the most active station for the last year of data. 
     Return a JSON list of temperature observations (TOBS) for the previous year."""
+    engine = create_engine("sqlite:///Resources/hawaii.sqlite")
+    conn = engine.connect()
+    session = Session(engine)
+    ms_df = pd.read_sql('Select * from Measurement', conn)
+    ms_df['total'] = 1
+    activeStation_df = ms_df.groupby(['station']).sum().sort_values(by='total', ascending=False).reset_index()
+    mostActiveStation = activeStation_df.iloc[0,0]
+    # Need to put variables in this section somehow so things aren't hard coded.
+    results = session.query(Measurement.station, Measurement.date, Measurement.tobs).filter(Measurement.station == 'USC00519281', Measurement.date > '2016-08-23' ).all()
     session.close()
+    this_query = list(np.ravel(results))
+    return jsonify(this_query)
 
 @app.route("/api/v1.0/<start>")
-def temp():
+def temp_range(start):
     # Create our session (link) from Python to the DB
     session = Session(engine)
-    return f"to write later"
     """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
     When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
     When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive."""
+    # I'm getting somewhere but the code below returns an error. It's calling the variable, but not as the correct type.
+    results = session.query(Measurement.tobs).filter(Measurement.date > {start}).all()
     session.close()
+    this_query = list(np.ravel(results))
+    return jsonify(this_query)
 
-@app.route("/api/v1.0/<start>/<end>")
-def temp_range():
-    # Create our session (link) from Python to the DB
-    session = Session(engine)
-    return f"to write later"
-    """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
-    When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
-    When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive."""
     session.close()
 
 if __name__ == '__main__':
