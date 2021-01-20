@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import datetime as dt
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
@@ -69,7 +70,7 @@ def tobs():
     session.close()
     return jsonify(results)
 
-@app.route("/api/v1.0/<start>") #NEED TO FIGURE OUT THE ENTIRE SECOND HALF OF THE ASSIGNMENT.
+@app.route("/api/v1.0/<start>") #NEED TO FIGURE OUT HOW TO USE VARIABLES SO I CAN FILTER RESULTS. PROBABLY NEED TO LEARN HOW TO WRITE CONDITIONALS?
 def temp_range(start):
     # Create our session (link) from Python to the DB
     session = Session(engine)
@@ -83,7 +84,7 @@ def temp_range(start):
     TMIN = res.TMIN
     TAVG = res.TAVG
     TMAX = res.TMIN
-    # (Measurement.tobs).filter(Measurement.date > start ).all()
+
     session.close()
     return (f'The minimum temperature for the given timeframe is {TMIN}.<br />'
             f'The approximate average temperature for the given timeframe is {round(TAVG,1)}.<br />'
