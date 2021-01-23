@@ -32,7 +32,7 @@ def index():
         f"/api/v1.0/<start>/<end><br/>"
     )
 
-@app.route("/api/v1.0/precipitation") #COMPLETE
+@app.route("/api/v1.0/precipitation") 
 def precipitation():
     # Create our session (link) from Python to the DB
     session = Session(engine)
@@ -43,7 +43,7 @@ def precipitation():
     return jsonify(results)
 
 
-@app.route("/api/v1.0/stations") #COMPLETE
+@app.route("/api/v1.0/stations") 
 def stations():
     # Create our session (link) from Python to the DB
     session = Session(engine)
@@ -54,7 +54,7 @@ def stations():
     this_query = list(np.ravel(results))
     return jsonify(this_query)
 
-@app.route("/api/v1.0/tobs") #RUNS, BUT I WOULD PREFER TO USE VARIABLES IN THE SESSION QUERY INSTEAD OF HARD-CODING THE VALUES
+@app.route("/api/v1.0/tobs") 
 def tobs():
     # Create our session (link) from Python to the DB
     """Query the dates and temperature observations of the most active station for the last year of data. 
@@ -70,20 +70,20 @@ def tobs():
     session.close()
     return jsonify(results)
 
-@app.route("/api/v1.0/<start>") #NEED TO FIGURE OUT HOW TO USE VARIABLES SO I CAN FILTER RESULTS. PROBABLY NEED TO LEARN HOW TO WRITE CONDITIONALS?
-def temp_range(start):
+@app.route("/api/v1.0/<start>/<end>") 
+def temp_range(start=None, end=None):
     # Create our session (link) from Python to the DB
     session = Session(engine)
     """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
     When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
     When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive."""
-    results = session.query(func.min(Measurement.tobs).label("TMIN"),
-                            func.avg(Measurement.tobs).label("TAVG"),
-                            func.max(Measurement.tobs).label("TMAX"))
+    results = session.query(func.min(Measurement.tobs).filter(Measurement.date >= start, Measurement.date <= end).label("TMIN"),
+                            func.avg(Measurement.tobs).filter(Measurement.date >= start, Measurement.date <= end).label("TAVG"),
+                            func.max(Measurement.tobs).filter(Measurement.date >= start, Measurement.date <= end).label("TMAX"))
     res = results.one()
     TMIN = res.TMIN
     TAVG = res.TAVG
-    TMAX = res.TMIN
+    TMAX = res.TMAX
 
     session.close()
     return (f'The minimum temperature for the given timeframe is {TMIN}.<br />'
