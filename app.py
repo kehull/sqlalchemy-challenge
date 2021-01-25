@@ -70,8 +70,9 @@ def tobs():
     session.close()
     return jsonify(results)
 
-@app.route("/api/v1.0/<start>/<end>") 
-def temp_range(start=None, end=None):
+@app.route("/api/v1.0/<start>/<end>")
+@app.route("/api/v1.0/<start>") 
+def temp_range(start, end=None):
     # Create our session (link) from Python to the DB
     session = Session(engine)
     """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
