@@ -85,6 +85,7 @@ def temp_range(start=None, end=None):
         TMIN = res.TMIN
         TAVG = res.TAVG
         TMAX = res.TMAX
+        session.close()
     elif end is None:
         results = session.query(func.min(Measurement.tobs).filter(Measurement.date >= start).label("TMIN"),
                             func.avg(Measurement.tobs).filter(Measurement.date >= start).label("TAVG"),
@@ -93,8 +94,8 @@ def temp_range(start=None, end=None):
         TMIN = res.TMIN
         TAVG = res.TAVG
         TMAX = res.TMAX
+        session.close()
 
-    session.close()
     return (f'The minimum temperature for the given timeframe is {TMIN}.<br />'
             f'The approximate average temperature for the given timeframe is {round(TAVG,1)}.<br />'
             f'The maximum temperature for the given timeframe is {TMAX}.<br />')
