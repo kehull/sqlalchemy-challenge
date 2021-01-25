@@ -77,13 +77,22 @@ def temp_range(start=None, end=None):
     """Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
     When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
     When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive."""
-    results = session.query(func.min(Measurement.tobs).filter(Measurement.date >= start, Measurement.date <= end).label("TMIN"),
+    if end is not None:
+        results = session.query(func.min(Measurement.tobs).filter(Measurement.date >= start, Measurement.date <= end).label("TMIN"),
                             func.avg(Measurement.tobs).filter(Measurement.date >= start, Measurement.date <= end).label("TAVG"),
                             func.max(Measurement.tobs).filter(Measurement.date >= start, Measurement.date <= end).label("TMAX"))
-    res = results.one()
-    TMIN = res.TMIN
-    TAVG = res.TAVG
-    TMAX = res.TMAX
+        res = results.one()
+        TMIN = res.TMIN
+        TAVG = res.TAVG
+        TMAX = res.TMAX
+    elif end is None:
+        results = session.query(func.min(Measurement.tobs).filter(Measurement.date >= start).label("TMIN"),
+                            func.avg(Measurement.tobs).filter(Measurement.date >= start).label("TAVG"),
+                            func.max(Measurement.tobs).filter(Measurement.date >= start).label("TMAX"))
+        res = results.one()
+        TMIN = res.TMIN
+        TAVG = res.TAVG
+        TMAX = res.TMAX
 
     session.close()
     return (f'The minimum temperature for the given timeframe is {TMIN}.<br />'
